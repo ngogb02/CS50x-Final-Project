@@ -1,38 +1,49 @@
 async function fetchData() {
+    // User inputed amount of base currency
     const amount = document.getElementById('amount');
-    const currency = document.getElementById('currency');
-    const convert = document.getElementById('convert');
-    const result = document.getElementById('result');
 
-    const API_KEY="2298de7d8bmshc01524c106fb916p177002jsn1fc4bae4c3f6"
-    const API_HOST="currency-conversion-and-exchange-rates.p.rapidapi.com"
-    const apiURL="https://currency-conversion-and-exchange-rates.p.rapidapi.com/latest?from=USD&to=EUR%2CGBP"
+    // User selected base currency 
+    const baseCurrency = document.getElementById('baseCurrency');
+
+    // User selected forex currency 
+    const forexCurrency = document.getElementById('forexCurrency');
+
+    // User Button (should trigger API call on click)
+    const convert = document.getElementById('convert');
+
+    // Dispplay result from API to this element
+    const result = document.getElementById('result');
 
     convert.addEventListener('click', async () => {
         const amountTotal = amount.value;
-        const currencyTotal = currency.value;
-        // const url = apiURL + currencyTotal;
-        const url = apiURL
+        const selectedBaseCurrency = baseCurrency.value;
+        const selectedForexCurrency = forexCurrency.value;
+        
+        console.log('base currency:', baseCurrency);
+        console.log('forex currency:', forexCurrency);
+
+        const baseUrl = 'https://crypto-market-prices.p.rapidapi.com/currencies/convert';
+        const url = `${baseUrl}?from=${selectedBaseCurrency}&to=${selectedForexCurrency}&amount=${amountTotal}`;
         console.log('url', url);
 
         const options = {
             method: 'GET',
             headers: {
                 'x-rapidapi-key': '2298de7d8bmshc01524c106fb916p177002jsn1fc4bae4c3f6',
-                'x-rapidapi-host': 'currency-conversion-and-exchange-rates.p.rapidapi.com'
+                'x-rapidapi-host': 'crypto-market-prices.p.rapidapi.com'
             }
         };
         
         try {
             const response = await fetch(url, options);
-            const result = await response.json();
-            console.log('result', result);
-            
-            if (result.rates) {
-                
+            const record = await response.json();
+            console.log('record', record);
+
+            if (record.data) {
+                document.getElementById("result").innerHTML = record.data.value
             } else {
                 console.error('No data property found in the record');
-                document.getElementById("result").innerHTML = 'failed';
+                document.getElementById("result").innerHTML = 'No exchange rate data found';
             }
 
         } catch (error) {
@@ -44,14 +55,3 @@ async function fetchData() {
 }
 fetchData();
 
-// .then(response => response.json())
-        // .then(data => {
-        //     const rate = data.rates['currencyTotal'];
-        //     console.log('rate', rate);
-        //     const resultPrice = amountTotal * rate;
-        //     result.innerHTML = `${amountTotal} ${currencyTotal} = ${resultPrice.toFixed(2)} USD`;
-        // })
-        // .catch(error => {
-        //     console.error('Request failed:', error);
-        //     result.innerHTML = 'An error occured, please try again later.'
-        // })

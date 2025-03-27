@@ -1,0 +1,24 @@
+.input-container {
+    position: relative; /* Enables absolute positioning inside */
+  }
+  
+  .input-container input {
+    width: 173px; /* Adjust width */
+    padding-right: 50px; /* Leave space for faded text */
+  }
+  
+  .faded-text {
+    position: absolute;
+    right: 825px; /* Position near the input field */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ccc; /* Faded color */
+    font-size: 0.9em; /* Slightly smaller font */
+    pointer-events: none; /* Prevent interactions */
+  }
+
+#convert {
+  background-color: #66BB6A;
+  color: white;
+  border: 1px solid black;
+}
