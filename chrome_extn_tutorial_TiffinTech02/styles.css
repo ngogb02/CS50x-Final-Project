@@ -9,7 +9,7 @@
   
   .faded-text {
     position: absolute;
-    right: 825px; /* Position near the input field */
+    left: 145px; /* Position near the input field */
     top: 50%;
     transform: translateY(-50%);
     color: #ccc; /* Faded color */
@@ -17,8 +17,18 @@
     pointer-events: none; /* Prevent interactions */
   }
 
+#selectionDiv {
+  padding-top: 10px;
+}
+
+#base
+
 #convert {
   background-color: #66BB6A;
   color: white;
   border: 1px solid black;
+  font-size: large;
+  font-weight: bold;
 }
+
+

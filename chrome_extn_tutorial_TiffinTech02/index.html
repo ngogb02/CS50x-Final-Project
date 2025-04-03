@@ -12,19 +12,19 @@
 
     <div class="input-container">
         <!-- User input field for amount (base) to convert -->
-        <input type="number" id="amount" placeholder="Enter in amount" style="width: 125px;">
+        <input type="number" id="amount" placeholder="Enter in amount" style="width: 125px; height: 30px;">
         <span class="faded-text" id="currencyLabel"></span>
     </div>
 
         <!-- Display the result of currency conversion -->
     <div class="input-container">
-        <input type="numebr" id="amount" style="width: 125px;" disabled>
+        <input type="text" id="forexAmount" style="width: 125px; height: 30px;" disabled>
         <span class="faded-text" id="resultCurrencyLabel"></span>
     </div>
     
-    <div style="display: flex; align-items: center; gap: 10px; margin: 0;">
+    <div id="selectionDiv" style="display: flex; align-items: center; gap: 10px; margin: 0;">
         <!-- Selection option for Currency Convert From -->
-        <select id="baseCurrency" style="width: 60px;">
+        <select id="baseCurrency" style="width: 60px; height: 30px; font-size: 15px;" >
             <option value="USD">USD</option>
             <option value="CAD">CAD</option>
             <option value="VND">VND</option>
@@ -35,7 +35,7 @@
         <img src="right.png" style="margin: 0 10px; width: 20px; height: 20px;" alt="Icon description">
         
         <!-- Select option for Currency Convert TO -->
-        <select id="forexCurrency" style="width: 60px;">
+        <select id="forexCurrency" style="width: 60px; height: 30px; font-size: 15px;" >
             <option value="CAD">CAD</option>
             <option value="VND">VND</option>
             <option value="JPY">JPY</option>
@@ -45,31 +45,32 @@
 
     <div>
         <!-- Button click to submit user input (currency selection and base amount) -->
-        <button id="convert" style="width: 180px;">Convert</button>
+        <button id="convert" style="width: 180px; height: 30px; margin-top: 10px;">Convert</button>
     </div>
 </body>
 
-<script>
-    const baseCurrency = document.getElementById('baseCurrency');
-    const currencyLabel = document.getElementById('currencyLabel');
-    
-    const forexCurrency = document.getElementById('forexCurrency');
-    const resultCurrencyLabel = document.getElementById('resultCurrencyLabel');
+<!-- <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const baseCurrency = document.getElementById('baseCurrency');
+        const currencyLabel = document.getElementById('currencyLabel');
+        
+        const forexCurrency = document.getElementById('forexCurrency');
+        const resultCurrencyLabel = document.getElementById('resultCurrencyLabel');
 
-    function updateCurrencyLabel() {
-        currencyLabel.textContent = baseCurrency.value;
-    }
+        function updateCurrencyLabel() {
+            currencyLabel.textContent = baseCurrency.value;
+        }
 
-    function updateForexCurrencyLabel() {
-        resultCurrencyLabel.textContent = forexCurrency.value;
-    }
+        function updateForexCurrencyLabel() {
+            resultCurrencyLabel.textContent = forexCurrency.value;
+        }
 
-    baseCurrency.addEventListener('change', updateCurrencyLabel);
-    forexCurrency.addEventListener('change', updateForexCurrencyLabel);
+        baseCurrency.addEventListener('change', updateCurrencyLabel);
+        forexCurrency.addEventListener('change', updateForexCurrencyLabel);
 
-    updateCurrencyLabel();
-    updateForexCurrencyLabel();
-
-</script>
+        updateCurrencyLabel();
+        updateForexCurrencyLabel();
+    })
+</script> -->
 
 </html>

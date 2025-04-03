@@ -40,18 +40,50 @@ async function fetchData() {
             console.log('record', record);
 
             if (record.data) {
-                document.getElementById("result").innerHTML = record.data.value
+                // Convert the string to a number 
+                const numericValue = parseFloat(record.data.value);
+
+                if (!isNaN(numericValue)) {
+                    const roundedValue = numericValue.toFixed(2);
+                    const formattedValue = parseFloat(roundedValue).toLocaleString("en-US");
+                    document.getElementById("forexAmount").value = formattedValue;
+                } else {
+                    console.error("The API returned a value that cannot be converted to a number.");
+                }
+                
             } else {
                 console.error('No data property found in the record');
-                document.getElementById("result").innerHTML = 'No exchange rate data found';
+                document.getElementById("forexAmount").value = 'No exchange rate data found';
             }
 
         } catch (error) {
             console.error('Error fetching data:', error);
-            document.getElementById("result").innerHTML = 'Failed to fetch exchange rate data.';
+            document.getElementById("forexAmount").value = 'Failed to fetch exchange rate data.';
         }
 
     })
 }
 fetchData();
+
+document.addEventListener("DOMContentLoaded", () => {
+    const baseCurrency = document.getElementById('baseCurrency');
+    const currencyLabel = document.getElementById('currencyLabel');
+    
+    const forexCurrency = document.getElementById('forexCurrency');
+    const resultCurrencyLabel = document.getElementById('resultCurrencyLabel');
+
+    function updateCurrencyLabel() {
+        currencyLabel.textContent = baseCurrency.value;
+    }
+
+    function updateForexCurrencyLabel() {
+        resultCurrencyLabel.textContent = forexCurrency.value;
+    }
+
+    baseCurrency.addEventListener('change', updateCurrencyLabel);
+    forexCurrency.addEventListener('change', updateForexCurrencyLabel);
+
+    updateCurrencyLabel();
+    updateForexCurrencyLabel();
+})
 

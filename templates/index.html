@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/snow.png" rel="icon">
+    <link href="/static/style.css" rel="stylesheet">
+    <title>Snow Watcher</title>
+</head>
+<body>
+
+    <header>
+        <h1>Snow Watcher</h1>
+    </header>
+
+    <main>
+        <section class="short_Forecast_12hr_7days">
+            <h2>{{ location["city"] }}, {{ location["state"] }}, {{ elevation["value"] | meter_to_feet }} Feet</h2>
+            <table class="forecast_table">
+                <tr>
+                    {% for period in forecastdata_periods %}
+                    <th>{{ period["name"] }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for period in forecastdata_periods %}
+                    <td> 
+                        <div class="tooltip">
+                            <img id="clickable_icon" src='{{ period["icon"] }}'/> 
+                            <span class='tooltip_detailed_forecast'>{{ period["detailedForecast"] }}</span>
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for period in forecastdata_periods %}
+                    <td>{{ period["temperature"] }} {{ period["temperatureUnit"] }}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for period in forecastdata_periods %}
+                    <div>
+                        <td class="centered_text">
+                            <span class="forecast_time">{{ period["startTime"] | ISO_time_reformat }} - {{ period["endTime"] | ISO_time_reformat }}</span>
+                            <br>
+                            <span class="forecast_text">{{ period["shortForecast"] }}</span>
+                        </td>
+                    </div>
+                    {% endfor %}
+                </tr>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p> Copyright Information, contact links, etc.</p>
+    </footer>
+
+</body>
+</html>
+
+                                                <!-- MAYBE USE FOR LATER -->
+<!-- <section class="detailed_Forecast_12hr_7days">
+    <h2>Detailed Forecast: <span class="elevation">{{ elevation["value"] | meter_to_feet }} Feet</span></h2>
+    <div>
+        <table class="table table-striped">
+            <tbody>
+                {% for period in forecastdata_periods %}
+                <tr>
+                    <th scope="row">{{ period["name"] }}<br>{{ period["startTime"] | ISO_time_reformat }} - {{ period["endTime"] | ISO_time_reformat }}</th>
+                    <td>{{ period["detailedForecast"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section> -->
