@@ -38,14 +38,14 @@ print(new_timeline_list)
 print(len(new_timeline_list))
 
 # Create numeric indices for the x-axis
-x_indices = list(range(len(timeline_list)))
+x_indices = list(range(len(new_timeline_list)))
 
 # Create the bar chart with numeric x-values
 fig = go.Figure(
     data=go.Bar(
         x=x_indices,
-        y=snowfall_list,
-        text=snowfall_list,
+        y=new_snowfall_list,
+        text=new_snowfall_list,
         textposition='auto',
         marker_color='lightsalmon'
     )
@@ -58,8 +58,8 @@ fig.update_layout(
         title='Time',
         tickmode='array',                 # Use an explicit list of tick positions
         tickvals=x_indices,               # A tick at every numeric index
-        ticktext=timeline_list,           # Replace numeric ticks with your time labels
-        range=[-0.5, len(timeline_list)-0.5],  # Set the range to show every bar
+        ticktext=new_timeline_list,           # Replace numeric ticks with your time labels
+        range=[-0.5, len(new_timeline_list)-0.5],  # Set the range to show every bar
         # tickangle=-45,                    # Rotate labels to help them fit
         tickfont=dict(size=7),            # Use smaller font so labels don’t crowd
         automargin=True                   # Let Plotly adjust margins as needed
