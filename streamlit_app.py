@@ -31,6 +31,30 @@ def fetchAPI_forecastdata() -> dict:
     else:
         print(f"fetchAPI_forecastdata failed to retrieve data: {response.status_code}")
 
+def fetchAPI_forecasthourlydata() -> dict:
+    points_json = fetchAPI_points()
+
+    response = requests.get(points_json["properties"]["forecastHourly"])
+
+    if response.status_code == 200:
+        hourlyForecast_json = response.json()
+
+        return hourlyForecast_json
+    else:
+        print(f"fetchAPI_forecashhourlydata failed to retrieve data: {response.status_code}")
+
+def fetchAPI_forecastGridData() -> dict:
+    points_json = fetchAPI_points()
+
+    response = requests.get(points_json["properties"]["forecastGridData"])
+
+    if response.status_code == 200:
+        forecastGridData_json = response.json()
+
+        return forecastGridData_json
+    else:
+        print(f"fetchAPI_forecashhourlydata failed to retrieve data: {response.status_code}")
+
 st.title("Streamlit Debugger for Flask Data")
 
 # Fetch and display first JSON
@@ -42,6 +66,14 @@ st.json(data1, expanded=False)
 data2 = fetchAPI_forecastdata()
 st.subheader("Forecast API JSON Data")
 st.json(data2, expanded=False)
+
+data3 = fetchAPI_forecasthourlydata()
+st.subheader("Forecast Hourly API JSON Data")
+st.json(data3,expanded=False)
+
+data4 = fetchAPI_forecastGridData()
+st.subheader("Forecast Grid Data API JSON")
+st.json(data4, expanded=False)
 
 # terminal cmd: streamlit run streamlit_app.py
 

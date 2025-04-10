@@ -39,6 +39,18 @@ def fetchAPI_forecastdata() -> dict:
     else:
         print(f"fetchAPI_forecastdata failed to retrieve data: {response.status_code}")
 
+def fetchAPI_forecastGridData() -> dict:
+    points_json = fetchAPI_points()
+
+    response = requests.get(points_json["properties"]["forecastGridData"])
+
+    if response.status_code == 200:
+        forecastGridData_json = response.json()
+
+        return forecastGridData_json
+    else:
+        print(f"fetchAPI_forecashhourlydata failed to retrieve data: {response.status_code}")
+
 # Custom Jinja filler to reformat ISOtime to 12hr PM/AM time
 @app.template_filter('ISO_time_reformat')
 def format_time(iso_time):
@@ -62,8 +74,10 @@ def after_request(response):
 
 @app.route("/")
 def index():
-    points = fetchAPI_points()
-    forecastdata = fetchAPI_forecastdata()
+    points:            dict = fetchAPI_points()
+    forecastdata:      dict = fetchAPI_forecastdata()
+    forecastgrid_data: dict = fetchAPI_forecastGridData()
+
     return render_template("index.html", 
                            forecastdata_periods = forecastdata["properties"]["periods"], 
                            elevation            = forecastdata["properties"]["elevation"], 
