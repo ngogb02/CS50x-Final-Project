@@ -53,7 +53,7 @@ def fetchAPI_forecastGridData() -> dict:
 
 # Custom Jinja filler to reformat ISOtime to 12hr PM/AM time
 @app.template_filter('ISO_time_reformat')
-def format_time(iso_time):
+def format_time(iso_time: str):
     datetime_obj = datetime.fromisoformat(iso_time)
     # Return only hour and AM/PM - ex: 12PM, 6AM, etc... 
     return datetime_obj.strftime('%I%p').lstrip('0')
