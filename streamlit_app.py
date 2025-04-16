@@ -57,20 +57,22 @@ def fetchAPI_forecastGridData() -> dict:
 
 st.title("Streamlit Debugger for Flask Data")
 
-# Fetch and display first JSON
+# Points API JSON Data
 data1 = fetchAPI_points()
 st.subheader("Points API JSON Data")
 st.json(data1, expanded=False)
 
-# Fetch and display second JSON
+# Forecast API JSON Data
 data2 = fetchAPI_forecastdata()
 st.subheader("Forecast API JSON Data")
 st.json(data2, expanded=False)
 
+# Forecast Hourly API JSON Data
 data3 = fetchAPI_forecasthourlydata()
 st.subheader("Forecast Hourly API JSON Data")
 st.json(data3,expanded=False)
 
+# Forecast Grid Data API JSON
 data4 = fetchAPI_forecastGridData()
 st.subheader("Forecast Grid Data API JSON")
 st.json(data4, expanded=False)

@@ -42,7 +42,7 @@ print(f"1: {snowfallAmount_json["values"][0]}")
 print(f"2: {snowfallAmount_json["values"][0]["validTime"]}")
 
 timeline_list = []
-date_list = []
+timelineDate_list = []
 snowfall_list = []
 
 # Loop through snowfallAmount.values 
@@ -59,6 +59,8 @@ for item in snowfallAmount_json["values"]:
             print(f"4: {format_time(str(parsed_timeStart))}")
             
             timeline_list.append(formatted_parsed_timeStart)
+
+            timelineDate_list.append(parsed_timeStart.strftime("%#I%p-%#d"))
         else:
             snowfall_list.append(value)
 
