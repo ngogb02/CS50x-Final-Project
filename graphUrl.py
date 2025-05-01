@@ -26,6 +26,8 @@ def getDetailedForecast(lat, lon):
 
     # Time frame for adjusting "ahour" parameter in the img_weather url
     ahour = ["0", "48", "96"] 
+    # binary adjustments to only display snow, rain, temp, and wind/gust from NOAA detailed Forecast plot
+    pcmd = "10001000101000000000000000000000000000000000000000000000000"
 
     parsed_url = urllib.parse.urlparse(img_weather)
 
@@ -47,7 +49,7 @@ def getDetailedForecast(lat, lon):
         query_params["ahour"] = [hour]
 
         # Modify to show only snow, rain, temp, and wind/gust speed
-        query_params["pcmd"] = ['10001000101000000000000000000000000000000000000000000000000']
+        query_params["pcmd"] = [pcmd]
 
         # Reassemble the query string; doseq=True ensures list values are handled correctly.
         new_query = urllib.parse.urlencode(query_params, doseq=True)
@@ -60,7 +62,7 @@ def getDetailedForecast(lat, lon):
 
     #-----------------------------------------------------------Image Concatenate-------------------------------------------------------------#
 
-    img_response_list = [Image.open(BytesIO(requests.get(img).content)) for img in img_url_3]
+    img_response_list = [Image.open(io.BytesIO(requests.get(img).content)) for img in img_url_3]
 
     width_total = sum([img.width for img in img_response_list])
     combined = Image.new('RGB', (width_total, img_response_list[0].height))
@@ -71,15 +73,18 @@ def getDetailedForecast(lat, lon):
         combined.paste(img, (x_offset,0))
         x_offset += img.width
 
-    # Convert the stitched image to BytesIO.
-    image_bytes = io.BytesIO()
-    combined.save(image_bytes, format="PNG") # Writing data moves the pointer to the end.
+    # Test Code:
+    combined.show()
 
-    # Reset the pointer to the start.
+    # Convert the stitched image to BytesIO.
+    image_bytes = io.BytesIO() # Create a new in-memory binary stream. 
+    combined.save(image_bytes, format="PNG") # Write the combined image to the allocated memory. Writing data moves the pointer to the end.
+
+    # After writing, reset the pointer to the start of memory.
     image_bytes.seek(0)
 
     # When returning, the pointer will start at the start and therefore able to point at the entire memory that contains the picture. 
-    return BytesIO(combined)
+    return image_bytes
 
 if __name__ == "__main__":
     lat = 47.428
