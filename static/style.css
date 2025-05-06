@@ -37,12 +37,12 @@ footer {
     margin-top: 8%;
 }
 
-.tooltip {
+.custom-tooltip {
     position: relative;
     display: inline-block; 
-}
+} 
 
-.tooltip .tooltip_detailed_forecast {
+.custom-tooltip .tooltip_detailed_forecast {
     visibility: hidden;
     width: 120px;
     background-color: rgb(35, 110, 201);
@@ -52,18 +52,47 @@ footer {
     padding: 5px;
     position: absolute;
     z-index: 1;
-    top: 100%; /* Position below the icon */
+    top: 100%; 
     left: 50%;
     margin-left: -60px;
     opacity: 0;
     transition: opacity 0.3s;
 }
 
-.tooltip:hover .tooltip_detailed_forecast {
+.custom-tooltip:hover .tooltip_detailed_forecast {
     visibility: visible;
     opacity: 1;
 }
 
 #clickable_icon {
     cursor: pointer;
+} 
+
+.detailed_forecast_plot img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+/* CSS for magnifying glass */
+
+* {box-sizing: border-box;}
+
+.img-magnifier-container {
+    position: relative;
+}
+
+.img-magnifier-glass {
+    position: absolute;
+    border: 3px solid #000;
+    border-radius: 0;
+    cursor: none;
+    /* Set the size of the magnifier */
+    width: 150px;
+    height: 160px;
 }

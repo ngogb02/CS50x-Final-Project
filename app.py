@@ -1,7 +1,10 @@
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
 from flask import Flask, render_template
+from io import BytesIO
 import requests
+import graphUrl 
+import base64
 
 # Configure application 
 app = Flask(__name__)
@@ -63,7 +66,6 @@ def format_elevation(meter):
     feet = meter * 3.28084
     return int(feet)
     
-
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -72,17 +74,31 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+
 @app.route("/")
 def index():
-    points:            dict = fetchAPI_points()
-    forecastdata:      dict = fetchAPI_forecastdata()
-    forecastgrid_data: dict = fetchAPI_forecastGridData()
+    points:              dict = fetchAPI_points()
+    forecastdata:        dict = fetchAPI_forecastdata()
+    detailedForecastPlot: BytesIO = graphUrl.getDetailedForecast(47.402094608175815, -121.41549110412599)
+    img_base64 = encode_image_to_base64(detailedForecastPlot)
+    # forecastgrid_data: dict = fetchAPI_forecastGridData() 
 
     return render_template("index.html", 
                            forecastdata_periods = forecastdata["properties"]["periods"], 
                            elevation            = forecastdata["properties"]["elevation"], 
-                           location             = points["properties"]["relativeLocation"]["properties"]
+                           location             = points["properties"]["relativeLocation"]["properties"],
+                           detailedForecastPlot = img_base64,
                            )
+
+def encode_image_to_base64(img_io):
+    # Ensure that the input coming in will have the pointer starting at the front of the allocated memory. 
+    img_io.seek(0)
+    # Binary image data (bytes) → Base64-encoded data (bytes) → Base64-encoded string (str).
+    base64_img = base64.b64encode(img_io.getvalue()).decode('ascii')
+    # Return a string neccesary to display the image as PNG in html.
+    return f'data:image/png;base64,{base64_img}'
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# cmd: flask run
