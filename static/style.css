@@ -93,6 +93,13 @@ footer {
     border-radius: 0;
     cursor: none;
     /* Set the size of the magnifier */
-    width: 150px;
-    height: 160px;
+    width: 100px;
+    height: 100px;
+}
+
+.lb-image {
+    max-width: none !important;
+    max-height: none !important;
+    width: auto !important;
+    height: auto !important;
 }

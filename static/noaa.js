@@ -24,25 +24,34 @@ function magnify(imgID, zoom) {
     /*and also for touch screens:*/
     glass.addEventListener("touchmove", moveMagnifier);
     img.addEventListener("touchmove", moveMagnifier);
-    
+
     function moveMagnifier(e) {
       var pos, x, y;
+      
       /* Prevent any other actions that may occur when moving over the image */
       e.preventDefault();
+
       /* Get the cursor's x and y positions: */
       pos = getCursorPos(e);
       x = pos.x;
       y = pos.y;
+
+      // Calculate scale factors based on natural vs displayed dimensions
+      var scaleX = img.naturalWidth / img.width;
+      var scaleY = img.naturalHeight / img.height;
+        
       /* Prevent the magnifier glass from being positioned outside the image: */
       if (x > img.width - (w / zoom)) {x = img.width - (w / zoom);}
       if (x < w / zoom) {x = w / zoom;}
       if (y > img.height - (h / zoom)) {y = img.height - (h / zoom);}
       if (y < h / zoom) {y = h / zoom;}
+
       /* Set the position of the magnifier glass: */
       glass.style.left = (x - w) + "px";
       glass.style.top = (y - h) + "px";
+
       /* Display what the magnifier glass "sees": */
-      glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
+      glass.style.backgroundPosition = "-" + (((x * scaleX) * zoom) - w + bw) + "px -" + (((y * scaleY) * zoom) - h + bw) + "px";
     }
   
     function getCursorPos(e) {
