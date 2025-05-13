@@ -103,3 +103,32 @@ footer {
     width: auto !important;
     height: auto !important;
 }
+
+.weather_logo {
+    width: 50px;
+    height: auto;
+    vertical-align: bottom;
+    margin-left: 15px;
+    margin-top: 5px;
+}
+
+.list-item {
+    margin-top: -15px;
+}
+
+.item-header {
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 30px;
+    margin-top: 30px;
+    padding: 10px;
+    border: 2px solid #333;
+    border-radius: 50px;
+    width: 100%;
+    max-width: 95vw;
+}
+
+.input-container {
+    margin-left: 1vw;
+}
