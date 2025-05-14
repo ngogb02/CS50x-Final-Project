@@ -33,7 +33,7 @@
                 <button type="submit">(+) Location</button>
                 <span>:</span>
                 <input type="text" id="latitude" name="latitude" placeholder="Latitude" required>
-                <span>,</span>
+                <span>,</span> 
                 <input type="text" id="longitude" name="longitude" placeholder="Longitude" required>
             </div>
         </form>
@@ -43,10 +43,13 @@
 
     <main>
 
-        {% if forecastdata_periods and forecastdata_periods|length > 0 %}
+        {% if forecasts|length > 0 %}
+            {% for forecast in forecasts %}
             <details class="list-item">
                 <!-- Collapsible Tab - Location, State, Elevation -->
-                <summary class="item-header">{{ location["city"] }}, {{ location["state"] }}, {{ elevation["value"] | meter_to_feet }} Feet</summary>
+                <summary class="item-header">{{ forecast.location["city"] }}, 
+                                            {{ forecast.location["state"] }}, 
+                                            {{ forecast.get("elevation", {}).get('value', 0) | meter_to_feet }} Feet</summary>
                     <section class="item-content">
                         <div class="short_Forecast_12hr_7days">
 
@@ -58,15 +61,15 @@
 
                                 <!-- #region: Dates -->
                                 <tr>
-                                    {% for period in forecastdata_periods %}
-                                    <th>{{ period["name"] }}</th>
+                                    {% for period in forecast.forecastdata_periods %}
+                                    <th>{{ periods["name"] }}</th>
                                     {% endfor %}
                                 </tr>
                                 <!-- #endregion: Dates -->
                                 
                                 <!-- #region: Weather Icons and Mouse-Hover-Over-Icon for Detailed Forecast -->
                                 <tr>
-                                    {% for period in forecastdata_periods %}
+                                    {% for period in forecast.forecastdata_periods %}
                                     <td> 
                                         <div class="custom-tooltip">
                                             <img id="clickable_icon" src='{{ period["icon"] }}'/> 
@@ -79,7 +82,7 @@
 
                                 <!-- #region: Temperature -->
                                 <tr>
-                                    {% for period in forecastdata_periods %}
+                                    {% for period in forecast.forecastdata_periods %}
                                     <td>{{ period["temperature"] }} {{ period["temperatureUnit"] }}</td>
                                     {% endfor %}
                                 </tr>
@@ -87,7 +90,7 @@
 
                                 <!-- #region: Hours and Short Forecast -->
                                 <tr>
-                                    {% for period in forecastdata_periods %}
+                                    {% for period in forecast.forecastdata_periods %}
                                     <!-- <div> -->
                                     <td class="centered_text">
                                         <span class="forecast_time">{{ period["startTime"] | ISO_time_reformat }} - {{ period["endTime"] | ISO_time_reformat }}</span>
@@ -110,8 +113,8 @@
                                 <div class="collapse" id="collapse_plot">
                                     <div class="image-container">
                                         <!-- class="img-magnifier-container" CHANGE DIV CLASS TO THIS IF WHAT TO USE MAG GLASS-->
-                                        <a href="{{ detailedForecastPlot }}" data-lightbox="forecast" data-title="Detailed Forecast">
-                                            <img src="{{ detailedForecastPlot }}" alt="Hourly Forecast" class="img-fluid">
+                                        <a href="{{ forecast.detailedForecastPlot }}" data-lightbox="forecast" data-title="Detailed Forecast">
+                                            <img src="{{ forecast.detailedForecastPlot }}" alt="Hourly Forecast" class="img-fluid">
                                         </a>
                                     </div>
                                 </div>
@@ -122,6 +125,7 @@
                         </div>
                     </section>
             </details>
+            {% endfor %}
         {% endif %}
 
     </main>
@@ -157,9 +161,9 @@
 </body>
 </html>
 
-<!-- #region: MaybeUseForLater -->
-                                                <!-- MAYBE USE FOR LATER -->
-<!-- <section class="detailed_Forecast_12hr_7days">
+<!-- #region: prototype : USE Jinja comments {# #} because this block of code uses Jinja bracket and thus gets evaluated by jinja even before the page is rendered. -->
+{#
+<section class="detailed_Forecast_12hr_7days">
     <h2>Detailed Forecast: <span class="elevation">{{ elevation["value"] | meter_to_feet }} Feet</span></h2>
     <div>
         <table class="table table-striped">
@@ -173,5 +177,6 @@
             </tbody>
         </table>
     </div>
-</section> -->
-<!-- #endregion MaybeUseForLater-->
+</section>
+#}
+<!-- #endregion: prototype -->

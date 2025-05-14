@@ -107,45 +107,40 @@ def after_request(response):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        latitude = request.form.get('latitude')
-        longitude = request.form.get('longitude')
+        # For now assume that the user will always input in a valid coordinate - latitude | longitude
+        latitude = float(request.form.get('latitude', '').strip())
+        longitude = float(request.form.get('longitude', '').strip())
 
-        # Store the coordinates in session
-        session['latitude'] = latitude
-        session['longitude'] = longitude
 
-        # Redirect to GET request
-        return redirect(url_for('index'))
-
-    # GET request handling
-    latitude = session.get('latitude')
-    longitude = session.get('longitude')
-
-    if latitude and longitude:
-        # Fetch data using stored coordinates
+        # Request the forecast data and the plot using the latitude and longitude.
         points:              dict = fetchAPI_points(latitude, longitude)
         forecastdata:        dict = fetchAPI_forecastdata(latitude, longitude)
-
         detailedForecastPlot: BytesIO = graphUrl.getDetailedForecast(latitude, longitude)
         img_base64 = encode_image_to_base64(detailedForecastPlot)
 
-        # Render with data
-        return render_template("index.html", 
-                            forecastdata_periods = forecastdata["properties"]["periods"], 
-                            elevation            = forecastdata["properties"]["elevation"], 
-                            location             = points["properties"]["relativeLocation"]["properties"],
-                            detailedForecastPlot = img_base64,
-                            )
+        
+        # Build a forecast dictionary.
+        forecast = {
+            "latitude" : latitude,
+            "longitude": longitude,
+            "forecastdata_periods" : forecastdata.get("properties", {}).get("periods", []),
+            "elevation" : forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0}),
+            "location" : points.get("properties, {}").get("relativeLocation", {}).get("properties", {}),
+            "detailedForecastPlot" : img_base64,
+        }
+
+        # Append the forecast dictionary to the session-stored list
+        # Check if there's already a list of forecasts stored in the session. If not, create an empty list.
+        # Update the session with the latest forecast after appending the new forecast.
+        forecasts: list = session.get("forecasts", [])
+        forecasts.append(forecast)
+        session["forecasts"] = forecasts
+
+        # Redirect to GET to display the forecast[s].
+        return redirect(url_for("index"))
     
-    # For GET requests, render the form template.
-    return render_template("index.html",
-                           forecastdata_periods=[], 
-                           elevation={"value": 0, "unitCode": ""}, 
-                           location={"city": "Unknown", "state": "Unknown"},
-                           detailedForecastPlot=None,
-                           latitude=latitude,
-                           longitude=longitude,
-                            )
+    forecasts = session.get("forecasts", [])
+    return render_template("index.html", forecasts=forecasts)
 
 
 if __name__ == '__main__':
