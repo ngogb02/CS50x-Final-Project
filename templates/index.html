@@ -32,9 +32,9 @@
             <div class="input-container">
                 <button type="submit">(+) Location</button>
                 <span>:</span>
-                <input type="text" id="latitude" name="latitude" placeholder="Latitude" required>
+                <input type="text" id="latitude" name="latitude" placeholder="Latitude" required autocomplete="off">
                 <span>,</span> 
-                <input type="text" id="longitude" name="longitude" placeholder="Longitude" required>
+                <input type="text" id="longitude" name="longitude" placeholder="Longitude" required autocomplete="off">
             </div>
         </form>
         <!-- #endregion: userForm -->
@@ -43,88 +43,84 @@
 
     <main>
 
-        {% if forecasts|length > 0 %}
+        {% if forecasts is not none %}
             {% for forecast in forecasts %}
-            <details class="list-item">
-                <!-- Collapsible Tab - Location, State, Elevation -->
-                <summary class="item-header">{{ forecast.location["city"] }}, 
-                                            {{ forecast.location["state"] }}, 
-                                            {{ forecast.get("elevation", {}).get('value', 0) | meter_to_feet }} Feet</summary>
-                    <section class="item-content">
-                        <div class="short_Forecast_12hr_7days">
+                <details class="list-item">
+                    <!-- Collapsible Tab - Location, State, Elevation -->
+                    <summary class="item-header">{{ forecast.location.get("city", "Unknown City") }}, 
+                                                {{ forecast.location.get("state", "Unknown State") }}, 
+                                                {{ forecast.get("elevation", {}).get('value', 0) | meter_to_feet }} Feet</summary>
+                        <section class="item-content">
+                            <div class="short_Forecast_12hr_7days">
 
-                            <!-- #region: [COMMENTED OUT] Header: Location Name, State, Elevation -->
-                            <!-- <h2>{{ location["city"] }}, {{ location["state"] }}, {{ elevation["value"] | meter_to_feet }} Feet</h2> -->
-                            <!-- #endregion: Header -->
+                                <table class="forecast_table">
 
-                            <table class="forecast_table">
+                                    <!-- #region: Dates -->
+                                    <tr>
+                                        {% for period in forecast.forecastdata_periods %}
+                                        <th>{{ period.get("name", "Unknown Name") }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    <!-- #endregion: Dates -->
+                                    
+                                    <!-- #region: Weather Icons and Mouse-Hover-Over-Icon for Detailed Forecast -->
+                                    <tr>
+                                        {% for period in forecast.forecastdata_periods %}
+                                        <td> 
+                                            <div class="custom-tooltip">
+                                                <img id="clickable_icon" src='{{ period["icon"] }}'/> 
+                                                <span class='tooltip_detailed_forecast'>{{ period.get("detailedForecast", "") }}</span>
+                                            </div>
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <!-- #endregion: Weather Icons and Hover tooltip -->
 
-                                <!-- #region: Dates -->
-                                <tr>
-                                    {% for period in forecast.forecastdata_periods %}
-                                    <th>{{ periods["name"] }}</th>
-                                    {% endfor %}
-                                </tr>
-                                <!-- #endregion: Dates -->
-                                
-                                <!-- #region: Weather Icons and Mouse-Hover-Over-Icon for Detailed Forecast -->
-                                <tr>
-                                    {% for period in forecast.forecastdata_periods %}
-                                    <td> 
-                                        <div class="custom-tooltip">
-                                            <img id="clickable_icon" src='{{ period["icon"] }}'/> 
-                                            <span class='tooltip_detailed_forecast'>{{ period["detailedForecast"] }}</span>
+                                    <!-- #region: Temperature -->
+                                    <tr>
+                                        {% for period in forecast.forecastdata_periods %}
+                                        <td>{{ period.get("temperature",  "") }} {{ period.get("temperatureUnit", "") }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <!-- #endregion Temperature -->
+
+                                    <!-- #region: Hours and Short Forecast -->
+                                    <tr>
+                                        {% for period in forecast.forecastdata_periods %}
+                                        <!-- <div> -->
+                                        <td class="centered_text">
+                                            <span class="forecast_time">{{ period.get("startTime", "") | ISO_time_reformat }} - {{ period.get("endTime", "") | ISO_time_reformat }}</span>
+                                            <br>
+                                            <span class="forecast_text">{{ period.get("shortForecast", "") }}</span>
+                                        </td>
+                                        <!-- </div> -->
+                                        {% endfor %}
+                                    </tr>
+                                    <!-- #endregion Hours and Short Forecast -->
+
+                                </table>
+
+                                <div> 
+
+                                    <!-- #region: Collapsible - Hourly Forecast --> 
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_plot" aria-expanded="false" aria-controls="collapse_plot">
+                                        Hourly Forecast 
+                                    </button>
+                                    <div class="collapse" id="collapse_plot">
+                                        <div class="image-container">
+                                            <!-- class="img-magnifier-container" CHANGE DIV CLASS TO THIS IF WHAT TO USE MAG GLASS-->
+                                            <a href="{{ forecast.detailedForecastPlot_Image }}" data-lightbox="forecast" data-title="Detailed Forecast">
+                                                <img src="{{ forecast.detailedForecastPlot_Image }}" alt="Hourly Forecast" class="img-fluid">
+                                            </a>
                                         </div>
-                                    </td>
-                                    {% endfor %}
-                                </tr>
-                                <!-- #endregion: Weather Icons and Hover tooltip -->
-
-                                <!-- #region: Temperature -->
-                                <tr>
-                                    {% for period in forecast.forecastdata_periods %}
-                                    <td>{{ period["temperature"] }} {{ period["temperatureUnit"] }}</td>
-                                    {% endfor %}
-                                </tr>
-                                <!-- #endregion Temperature -->
-
-                                <!-- #region: Hours and Short Forecast -->
-                                <tr>
-                                    {% for period in forecast.forecastdata_periods %}
-                                    <!-- <div> -->
-                                    <td class="centered_text">
-                                        <span class="forecast_time">{{ period["startTime"] | ISO_time_reformat }} - {{ period["endTime"] | ISO_time_reformat }}</span>
-                                        <br>
-                                        <span class="forecast_text">{{ period["shortForecast"] }}</span>
-                                    </td>
-                                    <!-- </div> -->
-                                    {% endfor %}
-                                </tr>
-                                <!-- #endregion Hours and Short Forecast -->
-
-                            </table>
-
-                            <div> 
-
-                                <!-- #region: Collapsible - Hourly Forecast --> 
-                                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_plot" aria-expanded="false" aria-controls="collapse_plot">
-                                    Hourly Forecast 
-                                </button>
-                                <div class="collapse" id="collapse_plot">
-                                    <div class="image-container">
-                                        <!-- class="img-magnifier-container" CHANGE DIV CLASS TO THIS IF WHAT TO USE MAG GLASS-->
-                                        <a href="{{ forecast.detailedForecastPlot }}" data-lightbox="forecast" data-title="Detailed Forecast">
-                                            <img src="{{ forecast.detailedForecastPlot }}" alt="Hourly Forecast" class="img-fluid">
-                                        </a>
                                     </div>
+                                    <!-- #endregion Hourly Forecast -->
+                                
                                 </div>
-                                <!-- #endregion Hourly Forecast -->
                             
                             </div>
-                        
-                        </div>
-                    </section>
-            </details>
+                        </section>
+                </details>
             {% endfor %}
         {% endif %}
 

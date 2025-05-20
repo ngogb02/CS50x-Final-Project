@@ -1,18 +1,28 @@
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, g, session
+# Removed session import from flask, client size session has a limit of only 4KB or 4096bytes. 
+# Use Session from flask_session (server-side session - no sizing limit) 
+from flask_session import Session 
 from io import BytesIO
 from dotenv import load_dotenv
 import requests
 import graphUrl 
 import base64
 import os
+import sqlite3
+import json
 import secrets
 
 # Configure application 
 app = Flask(__name__)
+DATABASE = 'database.db'
 
+# Templates are reloaded automatically when they change, without needing to restart the server (STILL NEEDS TO HIT REFRESH PAGE).
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+# Session is cleared when user closes the web. 
+app.config['SESSION_PERMANENT'] = False
+
 
 # python -c "import secrets; print(secrets.token_hex(16))"
 load_dotenv()
@@ -22,8 +32,21 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY")
 # app.debug = True
 # toolbar = DebugToolbarExtension(app)
 
-#region: Utility Functions not connected to any route
+# Database connection helper: Using Flask’s g object ensures you reuse the same connection within a single request
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        # This line allows you to access rows as dictionaries
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
+# Initialize the Database
+def init_db():
+    db = get_db()
+    cursor = db.cursor()
+    db.commit()
+
+#region: Utility Functions not connected to any route
 # Use to get location's city name and state name.
 # Function GETS Lat and Long from user input via route()
 def fetchAPI_points(latitude: float, longitude: float) -> dict:
@@ -104,12 +127,26 @@ def after_request(response):
 
 #endregion: Custom Jinja filler functions
 
+# Clean Up After Each Request: It’s important to close the database connection after each request to avoid resource leaks. You can do this by registering a teardown function.
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
+    # Ensure active connection is available 
+    # Get a local cursor object for this request
+    db = get_db()
+    cursor = db.cursor()
+
     if request.method == "POST":
+
         # For now assume that the user will always input in a valid coordinate - latitude | longitude
-        latitude = float(request.form.get('latitude', '').strip())
-        longitude = float(request.form.get('longitude', '').strip())
+        latitude = request.form.get('latitude', '').strip()
+        longitude = request.form.get('longitude', '').strip()
 
 
         # Request the forecast data and the plot using the latitude and longitude.
@@ -118,32 +155,47 @@ def index():
         detailedForecastPlot: BytesIO = graphUrl.getDetailedForecast(latitude, longitude)
         img_base64 = encode_image_to_base64(detailedForecastPlot)
 
-        
-        # Build a forecast dictionary.
-        forecast = {
-            "latitude" : latitude,
-            "longitude": longitude,
-            "forecastdata_periods" : forecastdata.get("properties", {}).get("periods", []),
-            "elevation" : forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0}),
-            "location" : points.get("properties, {}").get("relativeLocation", {}).get("properties", {}),
-            "detailedForecastPlot" : img_base64,
-        }
+        # DB is setup so that lat and long is a unique composite. This will replace the entry if lat and long from POST method is the same as in the db. It will insert a new entry if lat and long is different.
+        cursor.execute('''INSERT OR REPLACE INTO forecasts (latitude, longitude, location, elevation, forecastdata_periods, detailedForecastPlot_Image) 
+                    VALUES (?, ?, ?, ?, ?, ?)''',
+                    (
+                        latitude,
+                        longitude,
+                        json.dumps(points.get("properties", {}).get("relativeLocation", {}).get("properties", {})),
+                        json.dumps(forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0})),
+                        json.dumps(forecastdata.get("properties", {}).get("periods", [])),
+                        img_base64,
+                    ))
+        db.commit()
 
-        # Append the forecast dictionary to the session-stored list
-        # Check if there's already a list of forecasts stored in the session. If not, create an empty list.
-        # Update the session with the latest forecast after appending the new forecast.
-        forecasts: list = session.get("forecasts", [])
-        forecasts.append(forecast)
-        session["forecasts"] = forecasts
+    # Retrieve forecast entries from the database.
+    cursor.execute("SELECT * FROM forecasts")
+    rows = cursor.fetchall()
 
-        # Redirect to GET to display the forecast[s].
-        return redirect(url_for("index"))
+    # Initiate an empty list (this will hold the list of dictionarys - forecasts from db)
+    if rows:
+        forecasts = []
+        for row in rows:
+            forecasts.append({
+                                  "latitude" : row[1],
+                                 "longitude" : row[2],
+                                  "location" : json.loads(row[3]), # Convert JSON string to dict
+                                 "elevation" : json.loads(row[4]), # Convert JSON string to dict
+                      "forecastdata_periods" : json.loads(row[5]), # Convert JSON string to dict
+                "detailedForecastPlot_Image" : row[6],
+                })
+    else:
+        forecasts = None
     
-    forecasts = session.get("forecasts", [])
-    return render_template("index.html", forecasts=forecasts)
+    print(forecasts)
+    return render_template("index.html", forecasts = forecasts)
 
 
 if __name__ == '__main__':
+
+    with app.app_context():
+        init_db()
     app.run(debug=True)
+
 
 # cmd: flask run
