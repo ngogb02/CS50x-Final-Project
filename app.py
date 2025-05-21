@@ -1,9 +1,6 @@
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, g, session
-# Removed session import from flask, client size session has a limit of only 4KB or 4096bytes. 
-# Use Session from flask_session (server-side session - no sizing limit) 
-from flask_session import Session 
+from flask import Flask, render_template, request, g
 from io import BytesIO
 from dotenv import load_dotenv
 import requests
@@ -12,7 +9,6 @@ import base64
 import os
 import sqlite3
 import json
-import secrets
 
 # Configure application 
 app = Flask(__name__)
@@ -28,7 +24,6 @@ app.config['SESSION_PERMANENT'] = False
 load_dotenv()
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-# app.config['SECRET_KEY'] = 'your_secret_key'
 # app.debug = True
 # toolbar = DebugToolbarExtension(app)
 
@@ -135,9 +130,40 @@ def close_db(error):
         db.close()
 
 
+def refresh_forecastdata():
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT latitude, longitude FROM forecasts")
+    rows = cursor.fetchall()
+    if not rows:
+        return 
+    else:
+        for latitude, longitude in rows:
+            # Request the forecast data and the plot using the latitude and longitude.
+            points:              dict = fetchAPI_points(latitude, longitude)
+            forecastdata:        dict = fetchAPI_forecastdata(latitude, longitude)
+            detailedForecastPlot: BytesIO = graphUrl.getDetailedForecast(latitude, longitude)
+            img_base64 = encode_image_to_base64(detailedForecastPlot)
+
+            # DB is setup so that lat and long is a unique composite. This will replace the entry if lat and long from POST method is the same as in the db. It will insert a new entry if lat and long is different.
+            cursor.execute('''INSERT OR REPLACE INTO forecasts (latitude, longitude, location, elevation, forecastdata_periods, detailedForecastPlot_Image, last_updated) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                        (
+                            latitude,
+                            longitude,
+                            json.dumps(points.get("properties", {}).get("relativeLocation", {}).get("properties", {})),
+                            json.dumps(forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0})),
+                            json.dumps(forecastdata.get("properties", {}).get("periods", [])),
+                            img_base64,
+                            datetime.now(),
+                        ))
+        db.commit()
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # Ensure active connection is available 
+     # Ensure active connection is available 
     # Get a local cursor object for this request
     db = get_db()
     cursor = db.cursor()
@@ -156,8 +182,8 @@ def index():
         img_base64 = encode_image_to_base64(detailedForecastPlot)
 
         # DB is setup so that lat and long is a unique composite. This will replace the entry if lat and long from POST method is the same as in the db. It will insert a new entry if lat and long is different.
-        cursor.execute('''INSERT OR REPLACE INTO forecasts (latitude, longitude, location, elevation, forecastdata_periods, detailedForecastPlot_Image) 
-                    VALUES (?, ?, ?, ?, ?, ?)''',
+        cursor.execute('''INSERT OR REPLACE INTO forecasts (latitude, longitude, location, elevation, forecastdata_periods, detailedForecastPlot_Image, last_updated) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
                     (
                         latitude,
                         longitude,
@@ -165,11 +191,17 @@ def index():
                         json.dumps(forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0})),
                         json.dumps(forecastdata.get("properties", {}).get("periods", [])),
                         img_base64,
+                        datetime.now(),
                     ))
         db.commit()
 
+
+    # Refresh the database.
+    refresh_forecastdata()
+
     # Retrieve forecast entries from the database.
     cursor.execute("SELECT * FROM forecasts")
+    # If db is not empty then refresh the data before building the rows.
     rows = cursor.fetchall()
 
     # Initiate an empty list (this will hold the list of dictionarys - forecasts from db)
@@ -177,25 +209,20 @@ def index():
         forecasts = []
         for row in rows:
             forecasts.append({
-                                  "latitude" : row[1],
-                                 "longitude" : row[2],
-                                  "location" : json.loads(row[3]), # Convert JSON string to dict
-                                 "elevation" : json.loads(row[4]), # Convert JSON string to dict
-                      "forecastdata_periods" : json.loads(row[5]), # Convert JSON string to dict
+                "latitude" : row[1],
+                "longitude" : row[2],
+                "location" : json.loads(row[3]), # Convert JSON string to dict
+                "elevation" : json.loads(row[4]), # Convert JSON string to dict
+                "forecastdata_periods" : json.loads(row[5]), # Convert JSON string to dict
                 "detailedForecastPlot_Image" : row[6],
                 })
     else:
         forecasts = None
     
-    print(forecasts)
     return render_template("index.html", forecasts = forecasts)
 
 
 if __name__ == '__main__':
-
-    with app.app_context():
-        init_db()
     app.run(debug=True)
-
 
 # cmd: flask run
