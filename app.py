@@ -1,6 +1,6 @@
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, request, g, jsonify
 from io import BytesIO
 from dotenv import load_dotenv
 import requests
@@ -130,6 +130,7 @@ def close_db(error):
         db.close()
 
 
+
 def refresh_forecastdata():
     db = get_db()
     cursor = db.cursor()
@@ -156,9 +157,51 @@ def refresh_forecastdata():
                             json.dumps(forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0})),
                             json.dumps(forecastdata.get("properties", {}).get("periods", [])),
                             img_base64,
-                            datetime.now(),
+                            datetime.now().isoformat(),
                         ))
         db.commit()
+
+@app.route("/api/forecast", methods=["POST"])
+def get_forecast():
+    db = get_db()
+    cursor = db.cursor()
+
+    # Parses the incoming request's body as JSON and returns a Python dictionary.
+    data = request.get_json()
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+
+    points: dict = fetchAPI_points(latitude, longitude)
+    forecastdata: dict = fetchAPI_forecastdata(latitude, longitude)
+    detailedForecastPlot: BytesIO = graphUrl.getDetailedForecast(latitude, longitude)
+    img_base64 = encode_image_to_base64(detailedForecastPlot)
+
+    cursor.execute('''INSERT OR REPLACE INTO forecasts (latitude, longitude, location, elevation, forecastdata_periods, detailedForecastPlot_Image, last_updated) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                        (
+                            latitude,
+                            longitude,
+                            json.dumps(points.get("properties", {}).get("relativeLocation", {}).get("properties", {})),
+                            json.dumps(forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0})),
+                            json.dumps(forecastdata.get("properties", {}).get("periods", [])),
+                            img_base64,
+                            datetime.now().isoformat(),
+                        ))
+    db.commit()
+    
+    cursor.execute("SELECT * FROM forecasts WHERE latitude = ? AND longitude = ?", (latitude, longitude))
+    # fetchone() returns a tuple or a dict (..., ..., ...) | fetchall() returns a list of rows [(..., ..., ...), (...), (...)]
+    row = cursor.fetchone()
+    forecast = {
+            "latitude" : row[1],
+            "longitude" : row[2],
+            "location" : json.loads(row[3]), # Convert JSON string to dict
+            "elevation" : json.loads(row[4]), # Convert JSON string to dict
+            "forecastdata_periods" : json.loads(row[5]), # Convert JSON string to dict
+            "detailedForecastPlot_Image" : row[6],
+            }
+    
+    return jsonify(forecast)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -191,7 +234,7 @@ def index():
                         json.dumps(forecastdata.get("properties", {}).get("elevation", {"unitCode": "", "value": 0})),
                         json.dumps(forecastdata.get("properties", {}).get("periods", [])),
                         img_base64,
-                        datetime.now(),
+                        datetime.now().isoformat(),
                     ))
         db.commit()
 

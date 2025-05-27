@@ -42,7 +42,7 @@
     </header>
 
     <main>
-
+        
         {% if forecasts is not none %}
             {% for forecast in forecasts %}
                 <details class="list-item">
@@ -103,10 +103,10 @@
                                 <div> 
 
                                     <!-- #region: Collapsible - Hourly Forecast --> 
-                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_plot" aria-expanded="false" aria-controls="collapse_plot">
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_plot_{{ forecast.get('latitude') | replace('.', '_') | replace('-', '_') }}_{{ forecast.get('longitude') | replace('.', '_') | replace('-', '_') }}" aria-expanded="false" aria-controls="collapse_plot_{{ forecast.get('latitude') | replace('.', '_') | replace('-', '_') }}_{{ forecast.get('longitude') | replace('.', '_') | replace('-', '_') }}">
                                         Hourly Forecast 
                                     </button>
-                                    <div class="collapse" id="collapse_plot">
+                                    <div class="collapse" id="collapse_plot_{{ forecast.get('latitude') | replace('.', '_') | replace('-', '_') }}_{{ forecast.get('longitude') | replace('.', '_') | replace('-', '_') }}">
                                         <div class="image-container">
                                             <!-- class="img-magnifier-container" CHANGE DIV CLASS TO THIS IF WHAT TO USE MAG GLASS-->
                                             <a href="{{ forecast.detailedForecastPlot_Image }}" data-lightbox="forecast" data-title="Detailed Forecast">
@@ -139,7 +139,8 @@
     </script>
     
     <!-- Javascript -->
-    <script src="/static/noaa.js"></script>
+    <!-- <script src="/static/noaa.js"></script> -->
+    <script src="/static/forecast.js"></script>
 
     <!-- Lightbox -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
