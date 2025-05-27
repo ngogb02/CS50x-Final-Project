@@ -5,15 +5,22 @@
 This is a simple webpage that allows users to get percise weather forecast of their desired location[s] by inputting in the latitude and longitude of that exact spot. The latitude and longitude can be found via google map or other ways. Each forecast is shown up as a tab and can be expanded to view the detailed forecast. 
 </p>
 
+#### Inpiration:
+<p>
+This webpage was insipired by the NOAA (National Oceanic and Atmospheric Administration) weather forecast website. All of the weather forecast information displayed on this webpage was extracted from the NOAA Free API. <br> 
+The main purpose of this site is not to present new or modified forecast information from the NOAA's page, but rather, it is a "one-stop shop" where the user can create a page that holds all of their desired forecast locations, without navigating through various pages.
+</p>
+
 ## Table of Contents
 1. [Description](#description)
-2. [Built With](#built-with)
-3. [Getting Started](#getting-started)
+2. [Inspiration](#inpiration)
+3. [Built With](#built-with)
+4. [Getting Started](#getting-started)
     * [Prerequisites](#prerequisites)
     * [Installation](#installation)
-4. [Usage](#usage)
-5. [Roadmap](#roadmap)
-6. [Contact](#contact)
+5. [Usage](#usage)
+6. [Roadmap](#roadmap)
+7. [Contact](#contact)
 
 ## Built With
 * [![Python][Python-Icon]][Python-url]
@@ -59,8 +66,10 @@ It is highly recommended to use a database browser tool GUI to work with SQLite/
 Find the latitude and longitude of your desired location, input it in the web's latitude and longitude text box and click on the "(+) Location" button. A minimized weather tabs of the location will appear, you can expand it by clicking on it to see the forecasts. 
 
 ## Roadmap
+- [X] Add AJAX method to render weather tab without render entire page.
+- [ ] When Hourly Forecast tab is maximized, minimizing the main tab should also minimize the Hourly Forecast tab.
 - [ ] Add a button to delete weather forecast tab.
-- [ ] Add AJAX method to render weather tab without render entire page.
+- [ ] Add a function to allow users to modify the name of the location and update the db to reflect the new name. Might be an issue on reload with the API refresh db. 
 - [ ] Add dropdown or table with stored location's latitude/longitude.
 - [ ] Add daily weather icons on the minimized weather tabs. 
 
