@@ -67,7 +67,7 @@ Find the latitude and longitude of your desired location, input it in the web's 
 
 ## Roadmap
 - [X] Add AJAX method to render weather tab without render entire page.
-- [ ] When Hourly Forecast tab is maximized, minimizing the main tab should also minimize the Hourly Forecast tab.
+- [X] When Hourly Forecast tab is maximized, minimizing the main tab should also minimize the Hourly Forecast tab.
 - [ ] Add a button to delete weather forecast tab.
 - [ ] Add a function to allow users to modify the name of the location and update the db to reflect the new name. Might be an issue on reload with the API refresh db. 
 - [ ] Add dropdown or table with stored location's latitude/longitude.
