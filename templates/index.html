@@ -47,9 +47,14 @@
             {% for forecast in forecasts %}
                 <details class="list-item">
                     <!-- Collapsible Tab - Location, State, Elevation -->
-                    <summary class="item-header">{{ forecast.location.get("city", "Unknown City") }}, 
-                                                {{ forecast.location.get("state", "Unknown State") }}, 
-                                                {{ forecast.get("elevation", {}).get('value', 0) | meter_to_feet }} Feet</summary>
+                    <summary class="item-header">
+                        <span class="flex-container">
+                                {{ forecast.location.get("city", "Unknown City") }}, 
+                                {{ forecast.location.get("state", "Unknown State") }}, 
+                                {{ forecast.get("elevation", {}).get('value', 0) | meter_to_feet }} Feet
+                        </span>
+                                <button class="delete-button" data-id="{{ forecast.id }}">Delete</button>
+                    </summary>
                         <section class="item-content">
                             <div class="short_Forecast_12hr_7days">
 

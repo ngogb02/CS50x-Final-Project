@@ -193,6 +193,7 @@ def get_forecast():
     # fetchone() returns a tuple or a dict (..., ..., ...) | fetchall() returns a list of rows [(..., ..., ...), (...), (...)]
     row = cursor.fetchone()
     forecast = {
+            "id" : row[0],
             "latitude" : row[1],
             "longitude" : row[2],
             "location" : json.loads(row[3]), # Convert JSON string to dict
@@ -252,6 +253,7 @@ def index():
         forecasts = []
         for row in rows:
             forecasts.append({
+                "id" : row[0],
                 "latitude" : row[1],
                 "longitude" : row[2],
                 "location" : json.loads(row[3]), # Convert JSON string to dict
