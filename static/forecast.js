@@ -11,16 +11,25 @@ function sanitizeForId(value) {
     return value.toString().trim().replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
+function meterToFeet(meters) {
+    if (typeof meters === 'number') {
+        return (meters * 3.28084).toFixed(0); // Round to whole feet
+    }
+    return 0; // Default if not a number
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Reference to the formand forecast container
     const form = document.getElementById("userForm");
     // Use <main> as the container for forecast tabs
     const mainContainer = document.querySelector("main");
+
+    const addLocationButton = document.getElementById("addLocationButton");
     
     // Add an event listener to the form to get the latitude and longitude when a user submits their lat/lon. 
     // By using "preventDefault()", it intercepts the submission and handle it with JS, instead of the default having the data go to the backend immediately. 
     // This technique is useful when you want to process or validate the form data on the client side before deciding whether to actually send the data to the server.
-    form.addEventListener("submit", function(e) {
+    addLocationButton.addEventListener("click", function(e) {
         e.preventDefault();
 
         // Get the user's inputs.
@@ -41,8 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     fetch("/api/forecast", {
         method: "POST",
-        header: {
-            "Constant-Type": "application/json"
+        headers: {
+            "Content-Type": "application/json"
         },
         body: JSON.stringify(requestData)
     })
@@ -64,8 +73,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create the <summary> element for the header.
         const summaryElem = document.createElement("summary");
         summaryElem.classList.add("item-header")
+        const spanElem = document.createElement("span")
+        spanElem.classList.add("flex-container")
+
+        const elevationFeet = meterToFeet(data.elevation.value); // Convert this value to feet first before passing in the innerText.
+    
         // Fill the innerText of the <summary> with the location's city name, state, and elevation, using the data from the backend server. 
-        summaryElem.innerText = `${data.location.city || "Unknown City"}, ${data.location.state || "Unknown State"}, ${data.elevation.value || 0} Feet`;
+        spanElem.innerText = `${data.location.city || "Unknown City"}, ${data.location.state || "Unknown State"}, ${elevationFeet} Feet`;
+        // Create the delete button
+        const deleteButtonElem = document.createElement("button");
+        deleteButtonElem.classList.add("delete-button");
+        deleteButtonElem.textContent = "Delete";
+        deleteButtonElem.id = data.id;
+        
+        summaryElem.appendChild(spanElem);
+        summaryElem.appendChild(deleteButtonElem);
         detailsElem.appendChild(summaryElem);
 
         // Create the <section> for the forecast content.
@@ -236,7 +258,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-
-
-})

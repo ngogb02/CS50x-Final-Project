@@ -28,9 +28,9 @@
         <!-- #endregion: Page Title and Logo -->
 
         <!-- #region: userForm: Lat, Long -->
-        <form id="userForm" method="post" action="/">
+        <form id="userForm" method="post">
             <div class="input-container">
-                <button type="submit">(+) Location</button>
+                <button type="button" id="addLocationButton">(+) Location</button>
                 <span>:</span>
                 <input type="text" id="latitude" name="latitude" placeholder="Latitude" required autocomplete="off">
                 <span>,</span> 
@@ -147,6 +147,7 @@
     <!-- <script src="/static/noaa.js"></script> -->
     <script src="/static/forecast.js"></script>
     <script src="/static/bootstrap_button_closed.js"></script>
+    <script src="/static/delete_forecast.js"></script>
 
     <!-- Lightbox -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

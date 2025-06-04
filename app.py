@@ -9,6 +9,7 @@ import base64
 import os
 import sqlite3
 import json
+import traceback
 
 # Configure application 
 app = Flask(__name__)
@@ -160,6 +161,37 @@ def refresh_forecastdata():
                             datetime.now().isoformat(),
                         ))
         db.commit()
+
+@app.route("/api/delete_forecast", methods=["POST"])
+def delete_forecast():
+    db = get_db()
+    cursor = db.cursor()
+
+    # Parse the incoming request's body as JSON and return a python dict.
+    data = request.get_json()
+    # Get the id associated with the delete button that the user clicked on. 
+    id = data.get('id')
+    print(f"Received ID: {id}") # Add this line
+    print(f"Type of ID: {type(id)}") # Add this line
+
+    if id is None:
+        return jsonify({"error": "Missing forecast ID"}), 400  # Return an error response
+    try:
+        # Delete the forecast from database by the id
+        print(f"Executing SQL: DELETE FROM forecasts WHERE id = ? with ID: {id}") # Add this line
+        cursor.execute("DELETE FROM forecasts WHERE id = ?", (id,)) # Note the comma for a single-element tuple
+        db.commit()
+
+        return jsonify({"message": f"Forecast {id} deleted successfully"}), 200
+    
+    except Exception as e:
+        db.rollback()
+        # --- IMPORTANT CHANGE HERE ---
+        print("An error occurred during forecast deletion:")
+        traceback.print_exc() # This will print the full traceback to your server console
+        # --- END IMPORTANT CHANGE ---
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/forecast", methods=["POST"])
 def get_forecast():
